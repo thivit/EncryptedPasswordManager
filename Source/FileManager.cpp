@@ -68,6 +68,34 @@ static vector<Credential> loadCredentials(string filename) {
 
 // delete credential
 static bool deleteCredential(string filename, string service) {
+    // open file for reading
+    ifstream file(filename);
+    // check if file failed to open
+    if (!file.is_open())
+        return false;
 
+    vector<string> lines;
+    string line;
+    bool found = false;
+
+    while (getline(file,line)) {
+        // check if line does not start with the matchig service
+        if (line.rfind(service + ",", 0) != 0) {
+            // keep everything except matching entries
+            lines.push_back(line);
+        } else {
+            found = true;
+        }
+    }
+    file.close();
+
+    // rewrite file with kept entries (truncate mode clears files contents)
+    ofstream outFile(filename, ios::trunc);
+    for (string line : lines)
+    {
+        outFile << line << "/n";
+    }
+
+     return found;
 }
 
