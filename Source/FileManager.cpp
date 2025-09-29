@@ -32,12 +32,38 @@ static vector<string> readFromFile(string filename) {
 
 // save credential to file
 static bool saveCredential(string filename, Credential cred) {
-
+    // append mode (open file for writing)
+    ofstream file(filename, ios::app);
+    // check if file failed to open
+    if (!file.is_open())
+        return false;
+    // write comma seperated line
+    file << cred.service << "," << cred.username << "," << cred.password << "/n";
+    return true;
 }
 
 // load credentials from file
 static vector<Credential> loadCredentials(string filename) {
-
+    // create container to store credentials
+    vector<Credential> creds;
+    // open file for reading
+    ifstream file(filename);
+    // temp variable to hold current line
+    string line;
+    // read file line by line
+    while (getline(file, line)) {
+        stringstream ss(line);
+        string service;
+        string username;
+        string password;
+        // ensure all three parts are found before reading
+        if (getline(ss, service, ',') && 
+            getline(ss, username, ',' ) && 
+            getline(ss, password, ',')) {
+                creds.push_back({service, username, password});
+            }
+    }
+    return creds;
 }
 
 // delete credential
