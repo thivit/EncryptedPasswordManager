@@ -18,7 +18,16 @@ static bool writeToFile(string filename, string line) {
 
 // read all lines from file
 static vector<string> readFromFile(string filename) {
-
+    // create container to store lines
+    vector<string> lines;
+    // open file for reading
+    ifstream file(filename);
+    // temp variable to hold current line
+    string line;
+    // store file line by line into container
+    while (getline(file, line))
+        lines.push_back(line);
+    return lines;
 }
 
 // save credential to file
