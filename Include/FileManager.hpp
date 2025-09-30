@@ -13,19 +13,13 @@ struct Credential {
 
 class FileManager {
 public:
-    // write a single line to file
-    static bool writeToFile(string filename, string line);
-
-    // read all lines from file
-    static vector<string> readFromFile(string filename);
-
-    // save credential to file
+    // utility / general functions
+    static bool writeToFile(string filename, string line);  
+    static vector<string> readFromFile(string filename); 
+    
+    // credential functions
     static bool saveCredential(string filename, Credential cred);
-
-    // load credentials from file
     static vector<Credential> loadCredentials(string filename);
-
-    // delete credential
     static bool deleteCredential(string filename, string service);
 };
 
