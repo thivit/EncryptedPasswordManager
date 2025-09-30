@@ -129,7 +129,37 @@ static bool updateCredential(string filename, string service, Credential newCred
 
 static Credential findCredential(string filename, string service, bool found)
 {
+    ifstream file(filename);
+    
+    Credential cred;
+    found = false;
 
+    if (!file.is_open())
+        return cred;
+
+    string line;
+
+    while (getline(file, line))
+    {
+        if (line.rfind(service + ",", 0) == 0)
+        {
+            stringstream ss(line);
+            string service;
+            string username;
+            string password;
+
+            if (getline(ss, service, ',') &&
+                getline(ss, username, ',') &&
+                getline(ss, password, ','))
+                {
+                    cred = {service, username, password};
+                    found = true;
+                    break;
+                }
+        }
+    }
+
+    return cred;
 }
 
 static vector<string> listServices(string filename)
