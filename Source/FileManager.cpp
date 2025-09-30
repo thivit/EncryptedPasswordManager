@@ -34,8 +34,11 @@ bool                FileManager::saveCredential     (string filename, Credential
     ofstream file(filename, ios::app);
     if (!file.is_open())
         return false;
+
+    string encryptedUsername = Cipher::encrypt(cred.username, key);
+    string encryptedPassword = Cipher::encrypt(cred.password, key);
     
-    file << cred.service << "," << cred.username << "," << cred.password << "/n";
+    file << cred.service << "," << encryptedUsername << "," << encryptedPassword << "/n";
 
     return true;
 }
@@ -55,7 +58,9 @@ vector<Credential>  FileManager::loadCredentials    (string filename, string key
         if (getline(ss, service, ',') && 
             getline(ss, username, ',' ) && 
             getline(ss, password, ',')) {
-                creds.push_back({service, username, password});
+                string decryptedUsername = Cipher::decrypt(username, key);
+                string decryptedPassword = Cipher::decrypt(password, key);
+                creds.push_back({service, decryptedUsername, decryptedPassword});
             }
     }
 
@@ -100,8 +105,10 @@ bool                FileManager::updateCredential   (string filename, string ser
     {
         if (line.rfind(service + ",", 0) == 0)
         {
+            string encryptedUsername = Cipher::encrypt(newCred.username, key);
+            string encryptedPassword = Cipher::encrypt(newCred.password, key);
             stringstream ss;
-            ss << newCred.service << "," << newCred.username << "," << newCred.password;
+            ss << newCred.service << "," << encryptedUsername << "," << encryptedPassword;
             lines.push_back(ss.str());
             updated = true;
         }
@@ -150,7 +157,9 @@ Credential          FileManager::findCredential     (string filename, string ser
                 getline(ss, username, ',') &&
                 getline(ss, password, ','))
                 {
-                    cred = {service, username, password};
+                    cred.service = service;
+                    cred.username = Cipher::decrypt(username, key);
+                    cred.password = Cipher::decrypt(password, key);
                     found = true;
                     break;
                 }
