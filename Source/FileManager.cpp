@@ -81,9 +81,58 @@ static bool deleteCredential(string filename, string service)
     file.close();
 
     ofstream outFile(filename, ios::trunc);
-    for (string line : lines)
-        outFile << line << "/n";
+    for (string l : lines)
+        outFile << l << "/n";
 
      return found;
 }
 
+static bool updateCredential(string filename, string service, Credential newCred)
+{
+    ifstream file(filename);
+    if (!file.is_open())
+        return false;
+
+    vector<string> lines;
+    string line;
+    bool updated = false;
+
+    while (getline(file, line))
+    {
+        if (line.rfind(service + ",", 0) == 0)
+        {
+            stringstream ss;
+            ss << newCred.service << "," << newCred.username << "," << newCred.password;
+            lines.push_back(ss.str());
+            updated = true;
+        }
+        else
+        {
+            lines.push_back(line);
+        }
+    }
+
+    file.close();
+
+    if (!updated)
+        return false;
+
+    ofstream outFile(filename, ios::trunc);
+    if (!outFile.is_open())
+        return false;
+
+    for (string l : lines)
+        outFile << l << "\n";
+
+    return true;
+}
+
+static Credential findCredential(string filename, string service, bool found)
+{
+
+}
+
+static vector<string> listServices(string filename)
+{
+
+}
