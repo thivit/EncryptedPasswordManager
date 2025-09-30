@@ -164,5 +164,22 @@ static Credential findCredential(string filename, string service, bool found)
 
 static vector<string> listServices(string filename)
 {
+    ifstream file(filename);
+    
+    vector<string> services;
 
+    if (!file.is_open())
+        return services;
+
+    string line;
+
+    while (getline(file, line))
+    {
+        stringstream ss;
+        string service;
+        if (getline(ss, service, ','))
+            services.push_back(service);
+    }
+
+    return services;
 }
