@@ -22,7 +22,7 @@ public:
     static vector<Credential>   loadCredentials     (string filename, string key);
     static bool                 deleteCredential    (string filename, string service);
     static bool                 updateCredential    (string filename, string service, Credential newCred, string key);
-    static Credential           findCredential      (string filename, string service, bool found, string key);
+    static Credential           findCredential      (string filename, string service, bool& found, string key);
     static vector<string>       listServices        (string filename);
 };
 

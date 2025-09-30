@@ -38,7 +38,7 @@ bool                FileManager::saveCredential     (string filename, Credential
     string encryptedUsername = Cipher::encrypt(cred.username, key);
     string encryptedPassword = Cipher::encrypt(cred.password, key);
     
-    file << cred.service << "," << encryptedUsername << "," << encryptedPassword << "/n";
+    file << cred.service << "," << encryptedUsername << "," << encryptedPassword << "\n";
 
     return true;
 }
@@ -87,7 +87,7 @@ bool                FileManager::deleteCredential   (string filename, string ser
 
     ofstream outFile(filename, ios::trunc);
     for (string l : lines)
-        outFile << l << "/n";
+        outFile << l << "\n";
 
      return found;
 }
@@ -132,7 +132,7 @@ bool                FileManager::updateCredential   (string filename, string ser
 
     return true;
 }
-Credential          FileManager::findCredential     (string filename, string service, bool found, string key)
+Credential          FileManager::findCredential     (string filename, string service, bool& found, string key)
 {
     ifstream file(filename);
     
@@ -181,7 +181,7 @@ vector<string>      FileManager::listServices       (string filename)
 
     while (getline(file, line))
     {
-        stringstream ss;
+        stringstream ss(line);
         string service;
         if (getline(ss, service, ','))
             services.push_back(service);
