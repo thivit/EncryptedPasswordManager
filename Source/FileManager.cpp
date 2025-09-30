@@ -1,10 +1,12 @@
 #include "../Include/FileManager.hpp"
+#include "../Include/Cipher.hpp"
 
 #include <fstream>     
 #include <sstream>      
 #include <iostream>     
 
-static bool writeToFile(string filename, string line)
+// general functions
+bool                FileManager::writeToFile        (string filename, string line)
 {
     ofstream file(filename, ios::app);
     if (!file.is_open())
@@ -14,8 +16,7 @@ static bool writeToFile(string filename, string line)
 
     return true;
 }
-
-static vector<string> readFromFile(string filename)
+vector<string>      FileManager::readFromFile       (string filename)
 {
     vector<string> lines;
     string line;
@@ -27,7 +28,8 @@ static vector<string> readFromFile(string filename)
     return lines;
 }
 
-static bool saveCredential(string filename, Credential cred)
+// credential functions
+bool                FileManager::saveCredential     (string filename, Credential cred, string key)
 {
     ofstream file(filename, ios::app);
     if (!file.is_open())
@@ -37,8 +39,7 @@ static bool saveCredential(string filename, Credential cred)
 
     return true;
 }
-
-static vector<Credential> loadCredentials(string filename)
+vector<Credential>  FileManager::loadCredentials    (string filename, string key)
 {
     vector<Credential> creds;
     string line;
@@ -60,8 +61,7 @@ static vector<Credential> loadCredentials(string filename)
 
     return creds;
 }
-
-static bool deleteCredential(string filename, string service)
+bool                FileManager::deleteCredential   (string filename, string service)
 {
     ifstream file(filename);
     if (!file.is_open())
@@ -86,8 +86,7 @@ static bool deleteCredential(string filename, string service)
 
      return found;
 }
-
-static bool updateCredential(string filename, string service, Credential newCred)
+bool                FileManager::updateCredential   (string filename, string service, Credential newCred, string key)
 {
     ifstream file(filename);
     if (!file.is_open())
@@ -126,8 +125,7 @@ static bool updateCredential(string filename, string service, Credential newCred
 
     return true;
 }
-
-static Credential findCredential(string filename, string service, bool found)
+Credential          FileManager::findCredential     (string filename, string service, bool found, string key)
 {
     ifstream file(filename);
     
@@ -161,8 +159,7 @@ static Credential findCredential(string filename, string service, bool found)
 
     return cred;
 }
-
-static vector<string> listServices(string filename)
+vector<string>      FileManager::listServices       (string filename)
 {
     ifstream file(filename);
     
