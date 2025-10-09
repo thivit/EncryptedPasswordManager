@@ -1,7 +1,5 @@
 #include "../Include/Cipher.hpp"
 
-#include "../Include/Cipher.hpp"
-
 string Cipher::encrypt(string plaintext, string key) {
     string ciphertext = plaintext;
     size_t keyLength = key.size();
