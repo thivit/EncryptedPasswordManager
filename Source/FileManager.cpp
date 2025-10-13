@@ -35,8 +35,8 @@ bool                FileManager::saveCredential     (string filename, Credential
     if (!file.is_open())
         return false;
 
-    string encryptedUsername = Cipher::encrypt(cred.username, key);
-    string encryptedPassword = Cipher::encrypt(cred.password, key);
+    string encryptedUsername = Cipher::vigenereEncrypt(cred.username, key);
+    string encryptedPassword = Cipher::vigenereEncrypt(cred.password, key);
     
     file << cred.service << "," << encryptedUsername << "," << encryptedPassword << "\n";
 
@@ -58,8 +58,8 @@ vector<Credential>  FileManager::loadCredentials    (string filename, string key
         if (getline(ss, service, ',') && 
             getline(ss, username, ',' ) && 
             getline(ss, password, ',')) {
-                string decryptedUsername = Cipher::decrypt(username, key);
-                string decryptedPassword = Cipher::decrypt(password, key);
+                string decryptedUsername = Cipher::vigenereDecrypt(username, key);
+                string decryptedPassword = Cipher::vigenereDecrypt(password, key);
                 creds.push_back({service, decryptedUsername, decryptedPassword});
             }
     }
@@ -105,8 +105,8 @@ bool                FileManager::updateCredential   (string filename, string ser
     {
         if (line.rfind(service + ",", 0) == 0)
         {
-            string encryptedUsername = Cipher::encrypt(newCred.username, key);
-            string encryptedPassword = Cipher::encrypt(newCred.password, key);
+            string encryptedUsername = Cipher::vigenereEncrypt(newCred.username, key);
+            string encryptedPassword = Cipher::vigenereEncrypt(newCred.password, key);
             stringstream ss;
             ss << newCred.service << "," << encryptedUsername << "," << encryptedPassword;
             lines.push_back(ss.str());
@@ -158,8 +158,8 @@ Credential          FileManager::findCredential     (string filename, string ser
                 getline(ss, password, ','))
                 {
                     cred.service = service;
-                    cred.username = Cipher::decrypt(username, key);
-                    cred.password = Cipher::decrypt(password, key);
+                    cred.username = Cipher::vigenereDecrypt(username, key);
+                    cred.password = Cipher::vigenereDecrypt(password, key);
                     found = true;
                     break;
                 }
