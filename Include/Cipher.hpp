@@ -9,11 +9,11 @@ class Cipher {
     static string vigenereEncrypt(string plaintext, string key);
     static string vigenereDecrypt(string ciphertext, string key);
 
-    static string caesarEncrypt(string plaintext, int shift);
-    static string caesarDecrypt(string ciphertext, int shift);
+    static string caesarEncrypt(string plaintext, string shift);
+    static string caesarDecrypt(string ciphertext, string shift);
 
-    static string railFenceEncrypt(string plaintext, int noOfRails);
-    static string railFenceDecrypt(string ciphertext, int noOfRails);
+    static string railFenceEncrypt(string plaintext, string noOfRails);
+    static string railFenceDecrypt(string ciphertext, string noOfRails);
 };
 
 #endif
