@@ -30,15 +30,16 @@ string Cipher::vigenereDecrypt(string ciphertext, string key) {
     return plaintext;
 }
 
-string Cipher::caesarEncrypt(string plaintext, int shift){
+string Cipher::caesarEncrypt(string plaintext, string shift){
     string ciphertext = plaintext;
+    int shiftInt = stoi(shift);
 
     for (size_t i = 0; i < plaintext.size(); i++) {
         char c = plaintext[i];
 
         if (isalpha(c)) {
             char base = isupper(c) ? 'A' : 'a';
-            ciphertext[i] = (c - base + shift) % 26 + base;
+            ciphertext[i] = (c - base + shiftInt) % 26 + base;
         } else {
             ciphertext[i] = c;
         }
@@ -47,15 +48,16 @@ string Cipher::caesarEncrypt(string plaintext, int shift){
     return ciphertext;
 }
 
-string Cipher::caesarDecrypt(string ciphertext, int shift){
+string Cipher::caesarDecrypt(string ciphertext, string shift){
     string plaintext = ciphertext;
+    int shiftInt = stoi(shift);
 
     for (size_t i = 0; i < plaintext.size(); i++) {
         char c = ciphertext[i];
 
         if (isalpha(c)) {
             char base = isupper(c) ? 'A' : 'a';
-            ciphertext[i] = (c - base - shift) % 26 + base;
+            ciphertext[i] = (c - base - shiftInt) % 26 + base;
         } else {
             ciphertext[i] = c;
         }
@@ -64,18 +66,19 @@ string Cipher::caesarDecrypt(string ciphertext, int shift){
     return plaintext;
 }
 
-string Cipher::railFenceEncrypt(string plaintext, int noOfRails) {
+string Cipher::railFenceEncrypt(string plaintext, string noOfRails) {
+    int noOfRailsInt = stoi(noOfRails);
     if (noOfRails < 2) return plaintext;
 
     string ciphertext = "";
-    int cycle = 2 * (noOfRails - 1);
+    int cycle = 2 * (noOfRailsInt - 1);
     int len = plaintext.size();
 
-    for (int rail = 0; rail < noOfRails; rail++) {
+    for (int rail = 0; rail < noOfRailsInt; rail++) {
         for (int i = rail; i < len; i += cycle) {
             ciphertext += plaintext[i];
             int diag = i + cycle - 2 * rail;
-            if (rail != 0 && rail != noOfRails - 1 && diag < len)
+            if (rail != 0 && rail != noOfRailsInt - 1 && diag < len)
                 ciphertext += plaintext[diag];
         }
     }
@@ -83,19 +86,20 @@ string Cipher::railFenceEncrypt(string plaintext, int noOfRails) {
     return ciphertext;
 }
 
-string Cipher::railFenceDecrypt(string ciphertext, int noOfRails) {
+string Cipher::railFenceDecrypt(string ciphertext, string noOfRails) {
+    int noOfRailsInt = stoi(noOfRails);
     if (noOfRails < 2) return ciphertext;
 
     string plaintext(ciphertext.size(), ' ');
-    int cycle = 2 * (noOfRails - 1);
+    int cycle = 2 * (noOfRailsInt - 1);
     int len = ciphertext.size();
     int idx = 0;
 
-    for (int rail = 0; rail < noOfRails; rail++) {
+    for (int rail = 0; rail < noOfRailsInt; rail++) {
         for (int i = rail; i < len; i += cycle) {
             plaintext[i] = ciphertext[idx++];
             int diag = i + cycle - 2 * rail;
-            if (rail != 0 && rail != noOfRails - 1 && diag < len)
+            if (rail != 0 && rail != noOfRailsInt - 1 && diag < len)
                 plaintext[diag] = ciphertext[idx++];
         }
     }
