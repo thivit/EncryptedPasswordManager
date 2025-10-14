@@ -13,8 +13,7 @@ A simple C++ password manager that encrypts passwords before storing them.
 .
 ├─ Include/            # headers (Cipher.hpp, FileManager.hpp)
 ├─ Source/             # sources (Main.cpp, Cipher.cpp, FileManager.cpp)
-├─ scripts/
-│  └─ install_qt.sh    # Ubuntu/Debian: installs build tools + Qt5 dev
+├─ install_qt.sh       # Ubuntu/Debian: installs build tools + Qt5 dev
 ├─ Makefile            # minimal build (uses pkg-config for Qt)
 ├─ encrypted.txt       # sample output file (created by the app)
 ├─ decrypted.txt       # sample output file (created by the app)
