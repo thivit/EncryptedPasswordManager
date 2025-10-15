@@ -5,10 +5,16 @@ string Cipher::vigenereEncrypt(string plaintext, string key) {
     size_t keyLength = key.size();
 
     for (size_t i = 0; i < plaintext.size(); i++) {
-        char p = (plaintext[i] - 'A');
-        char k = (key[i % keyLength] - 'A');
-        if (plaintext[i] != ' '){
-            ciphertext[i] = (p + k) % 26 + 'A';
+        char ch = plaintext[i];
+        char k = tolower(key[i % keyLength]) - 'a';
+
+        if (isalpha(ch)) {
+            if (isupper(ch))
+                ciphertext[i] = ((ch - 'A' + k) % 26) + 'A';
+            else
+                ciphertext[i] = ((ch - 'a' + k) % 26) + 'a';
+        } else {
+            ciphertext[i] = ch;
         }
     }
 
@@ -20,10 +26,16 @@ string Cipher::vigenereDecrypt(string ciphertext, string key) {
     size_t keyLength = key.size();
 
     for (size_t i = 0; i < ciphertext.size(); i++) {
-        char c = (ciphertext[i] - 'A');
-        char k = (key[i % keyLength] - 'A');
-        if (ciphertext[i] != ' '){
-            plaintext[i] = (c - k + 26) % 26 + 'A';
+        char ch = ciphertext[i];
+        char k = tolower(key[i % keyLength]) - 'a';
+
+        if (isalpha(ch)) {
+            if (isupper(ch))
+                plaintext[i] = ((ch - 'A' - k + 26) % 26) + 'A';
+            else
+                plaintext[i] = ((ch - 'a' - k + 26) % 26) + 'a';
+        } else {
+            plaintext[i] = ch;
         }
     }
 
@@ -57,9 +69,9 @@ string Cipher::caesarDecrypt(string ciphertext, string shift){
 
         if (isalpha(c)) {
             char base = isupper(c) ? 'A' : 'a';
-            ciphertext[i] = (c - base - shiftInt) % 26 + base;
+            plaintext[i] = (c - base - shiftInt) % 26 + base;
         } else {
-            ciphertext[i] = c;
+            plaintext[i] = c;
         }
     }
 
@@ -68,7 +80,7 @@ string Cipher::caesarDecrypt(string ciphertext, string shift){
 
 string Cipher::railFenceEncrypt(string plaintext, string noOfRails) {
     int noOfRailsInt = stoi(noOfRails);
-    if (noOfRails < 2) return plaintext;
+    if (noOfRailsInt < 2) return plaintext;
 
     string ciphertext = "";
     int cycle = 2 * (noOfRailsInt - 1);
@@ -88,7 +100,7 @@ string Cipher::railFenceEncrypt(string plaintext, string noOfRails) {
 
 string Cipher::railFenceDecrypt(string ciphertext, string noOfRails) {
     int noOfRailsInt = stoi(noOfRails);
-    if (noOfRails < 2) return ciphertext;
+    if (noOfRailsInt < 2) return ciphertext;
 
     string plaintext(ciphertext.size(), ' ');
     int cycle = 2 * (noOfRailsInt - 1);
@@ -107,6 +119,27 @@ string Cipher::railFenceDecrypt(string ciphertext, string noOfRails) {
     return plaintext;
 }
 
+string Cipher::Encrypt(string plaintext, string key, int index){
+    if(index == 0){
+        return vigenereEncrypt(plaintext, key);
+    }else if(index == 1){
+        return caesarEncrypt(plaintext, key);
+    }else if(index == 2){
+        return railFenceEncrypt(plaintext, key);
+    }
+    return plaintext;
+}
+
+string Cipher::Decrypt(string ciphertext, string key, int index){
+    if(index == 0){
+        return vigenereDecrypt(ciphertext, key);
+    }else if(index == 1){
+        return caesarDecrypt(ciphertext, key);
+    }else if(index == 2){
+        return railFenceDecrypt(ciphertext, key);
+    }
+    return ciphertext;
+}
 
 // #include "../Include/Cipher.hpp"
 
