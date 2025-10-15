@@ -6,9 +6,9 @@ using namespace std;
 
 class Cipher {
     public:
-    static string encrypt(string plaintext, string key);
+    static string vigenereEncrypt(string plaintext, string key);
 
-    static string decrypt(string ciphertext, string key);
+    static string vigenereDecrypt(string ciphertext, string key);
 };
 
 #endif

@@ -29,20 +29,17 @@ vector<string>      FileManager::readFromFile       (string filename)
 }
 
 // credential functions
-bool                FileManager::saveCredential     (string filename, Credential cred, string key)
+bool                FileManager::saveCredential     (string filename, Credential cred)
 {
     ofstream file(filename, ios::app);
     if (!file.is_open())
         return false;
 
-    string encryptedUsername = Cipher::vigenereEncrypt(cred.username, key);
-    string encryptedPassword = Cipher::vigenereEncrypt(cred.password, key);
-    
-    file << cred.service << "," << encryptedUsername << "," << encryptedPassword << "\n";
+    file << cred.service << "," << cred.username << "," << cred.password << "\n";
 
     return true;
 }
-vector<Credential>  FileManager::loadCredentials    (string filename, string key)
+vector<Credential>  FileManager::loadCredentials    (string filename)
 {
     vector<Credential> creds;
     string line;
@@ -58,9 +55,7 @@ vector<Credential>  FileManager::loadCredentials    (string filename, string key
         if (getline(ss, service, ',') && 
             getline(ss, username, ',' ) && 
             getline(ss, password, ',')) {
-                string decryptedUsername = Cipher::vigenereDecrypt(username, key);
-                string decryptedPassword = Cipher::vigenereDecrypt(password, key);
-                creds.push_back({service, decryptedUsername, decryptedPassword});
+                creds.push_back({service, username, password});
             }
     }
 
@@ -91,7 +86,7 @@ bool                FileManager::deleteCredential   (string filename, string ser
 
      return found;
 }
-bool                FileManager::updateCredential   (string filename, string service, Credential newCred, string key)
+bool                FileManager::updateCredential   (string filename, string service, Credential newCred)
 {
     ifstream file(filename);
     if (!file.is_open())
@@ -105,10 +100,8 @@ bool                FileManager::updateCredential   (string filename, string ser
     {
         if (line.rfind(service + ",", 0) == 0)
         {
-            string encryptedUsername = Cipher::vigenereEncrypt(newCred.username, key);
-            string encryptedPassword = Cipher::vigenereEncrypt(newCred.password, key);
             stringstream ss;
-            ss << newCred.service << "," << encryptedUsername << "," << encryptedPassword;
+            ss << service << "," << newCred.username << "," << newCred.password;
             lines.push_back(ss.str());
             updated = true;
         }
@@ -132,7 +125,7 @@ bool                FileManager::updateCredential   (string filename, string ser
 
     return true;
 }
-Credential          FileManager::findCredential     (string filename, string service, bool& found, string key)
+Credential          FileManager::findCredential     (string filename, string service, bool& found)
 {
     ifstream file(filename);
     
@@ -158,8 +151,8 @@ Credential          FileManager::findCredential     (string filename, string ser
                 getline(ss, password, ','))
                 {
                     cred.service = service;
-                    cred.username = Cipher::vigenereDecrypt(username, key);
-                    cred.password = Cipher::vigenereDecrypt(password, key);
+                    cred.username = username;
+                    cred.password = password;
                     found = true;
                     break;
                 }
