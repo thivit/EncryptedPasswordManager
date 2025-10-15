@@ -14,6 +14,9 @@ class Cipher {
 
     static string railFenceEncrypt(string plaintext, string noOfRails);
     static string railFenceDecrypt(string ciphertext, string noOfRails);
+
+    static string Encrypt(string plaintext, string key, int index);
+    static string Decrypt(string ciphertext, string key, int index);
 };
 
 #endif
