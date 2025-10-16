@@ -66,7 +66,10 @@ int main(int argc, char *argv[])
     QVBoxLayout *FindCredentialLayout = new QVBoxLayout(FindCredentialPage);
 
     QLineEdit *ServiceFind = new QLineEdit();
-    ServiceInput->setPlaceholderText("service");
+    ServiceFind->setPlaceholderText("service");
+
+    QWidget *resultContainer = new QWidget();
+    QVBoxLayout *resultLayout = new QVBoxLayout(resultContainer);
 
     QPushButton *Find = new QPushButton("Find");
     QPushButton *backBtnFind = new QPushButton("← Back to Home");
@@ -75,6 +78,7 @@ int main(int argc, char *argv[])
     FindCredentialLayout->addSpacing(20);
     FindCredentialLayout->addWidget(Find);
     FindCredentialLayout->addWidget(backBtnFind);
+    FindCredentialLayout->addWidget(resultContainer);
     FindCredentialLayout->addStretch();
     //===========Update Credential page ===========
     QWidget *updateCredentialPage = new QWidget();
@@ -82,13 +86,14 @@ int main(int argc, char *argv[])
 
     QLineEdit *ServiceUpdate = new QLineEdit();
     ServiceUpdate->setPlaceholderText("service");
-    QLineEdit *username = new QLineEdit();
-    username->setPlaceholderText("username");
-    QLineEdit *password = new QLineEdit();
-    password->setPlaceholderText("password");
+    QLineEdit *usernameUpdate = new QLineEdit();
+    usernameUpdate->setPlaceholderText("username");
+    QLineEdit *passwordUpdate = new QLineEdit();
+    passwordUpdate->setPlaceholderText("password");
     QComboBox *encryptionType = new QComboBox();
-    encryptionType->addItem("None");
     encryptionType->addItem("Vigenere");
+    encryptionType->addItem("Caesar Cipher");
+    encryptionType->addItem("Rail Fence Cipher");
     QLineEdit *key = new QLineEdit();
     key->setPlaceholderText("Key");
 
@@ -96,8 +101,8 @@ int main(int argc, char *argv[])
     QPushButton *backBtnUpdate = new QPushButton("← Back to Home");
 
     updateCredentialLayout->addWidget(ServiceUpdate);
-    updateCredentialLayout->addWidget(username);
-    updateCredentialLayout->addWidget(password);
+    updateCredentialLayout->addWidget(usernameUpdate);
+    updateCredentialLayout->addWidget(passwordUpdate);
     updateCredentialLayout->addWidget(encryptionType);
     updateCredentialLayout->addWidget(key);
     updateCredentialLayout->addWidget(updateCredentialButton);
@@ -112,23 +117,30 @@ int main(int argc, char *argv[])
     QLineEdit *ServiceAdd = new QLineEdit();
     ServiceAdd->setPlaceholderText("service");
     QLineEdit *usernameAdd = new QLineEdit();
-    username->setPlaceholderText("username");
+    usernameAdd->setPlaceholderText("username");
     QLineEdit *passwordAdd = new QLineEdit();
-    password->setPlaceholderText("password");
-    QComboBox *encryptionTypeAdd = new QComboBox();
-    encryptionTypeAdd->addItem("None");
-    encryptionTypeAdd->addItem("Vigenere");
+    passwordAdd->setPlaceholderText("password");
+
+    QLabel *encryptLabel = new QLabel("Encryption Type:");
+    QComboBox *encryptCombo = new QComboBox();
+    encryptCombo->addItem("Vigenere Cipher");
+    encryptCombo->addItem("Caesar Cipher");
+    encryptCombo->addItem("Rail Fence Cipher");
     QLineEdit *keyAdd = new QLineEdit();
-    key->setPlaceholderText("Key");
+    keyAdd->setPlaceholderText("Key");
 
     QPushButton *AddCredentialButton = new QPushButton("Add Credential");
     QPushButton *backBtnAdd = new QPushButton("← Back to Home");
 
+
+
     AddCredentialLayout->addWidget(ServiceAdd);
     AddCredentialLayout->addWidget(usernameAdd);
     AddCredentialLayout->addWidget(passwordAdd);
-    AddCredentialLayout->addWidget(encryptionTypeAdd);
+
     AddCredentialLayout->addWidget(keyAdd);
+    AddCredentialLayout->addWidget(encryptLabel);
+    AddCredentialLayout->addWidget(encryptCombo);
     AddCredentialLayout->addWidget(AddCredentialButton);
     AddCredentialLayout->addSpacing(20);
     AddCredentialLayout->addStretch();
@@ -237,8 +249,8 @@ int main(int argc, char *argv[])
     QObject::connect(updateCredentialButton, &QPushButton::clicked, [=]()
                      {
                          string service = ServiceUpdate->text().toStdString();
-                         string user = username->text().toStdString();
-                         string pass = password->text().toStdString();
+                         string user = usernameUpdate->text().toStdString();
+                         string pass = passwordUpdate->text().toStdString();
                          string ET = encryptionType->currentText().toStdString();
                          string k = key->text().toStdString();
 
@@ -246,12 +258,20 @@ int main(int argc, char *argv[])
                             QMessageBox::warning(nullptr,"Warning","Please fill in service, username, and password.");
                             return;
                          }
-                         string finalPassword = pass;
-                        if (ET == "Vigenere" && !k.empty()) {
-                            finalPassword = Cipher::vigenereEncrypt(pass, k);
+                        int selectedIndex = encryptionType->currentIndex();
+                        if ((selectedIndex == 1 || selectedIndex == 2) && k.empty()) {
+                            QMessageBox::warning(nullptr, "Warning", "Key cannot be empty for Caesar or Rail Fence cipher.");
+                            return;
                         }
+                        if ((selectedIndex == 1 || selectedIndex == 2) && !std::all_of(k.begin(), k.end(), ::isdigit)) {
+                            QMessageBox::warning(nullptr, "Warning", "Key must be numeric for Caesar or Rail Fence cipher.");
+                            return;
+                        }
+                        
+                        Cipher cipher;
+                        string encryptedPassword = cipher.Encrypt(pass, k, selectedIndex);
 
-                        Credential newCred{service, user, finalPassword};
+                        Credential newCred{service, user, encryptedPassword};
 
                         bool success = FileManager::updateCredential("../Data/Data.txt", service, newCred);
 
@@ -314,71 +334,64 @@ int main(int argc, char *argv[])
 
     QObject::connect(Find, &QPushButton::clicked, [=]()
                      {
-                         string text = ServiceFind->text().toStdString();
-                         bool found;
-                         Credential cred = FileManager::findCredential("../Data/Data.txt", text, found);
-                        // Clear any previous message/buttons
-                        QLayoutItem *item;
-                        while (FindCredentialLayout->count() > 0) {
-                            QLayoutItem *item = FindCredentialLayout->takeAt(FindCredentialLayout->count() - 1);
-                            if (!item) break;
-                            QWidget *w = item->widget();
-                            if (w && w != ServiceFind && w != Find && w != backBtnFind) {
-                                delete w;
-                            }
-                            delete item;
-                        }
-                        FindCredentialLayout->addSpacing(10);
-                         if (found)
-                         {
-                             QLabel *alert = new QLabel("Credential found for this service.");
-                             alert->setAlignment(Qt::AlignCenter);
-                             alert->setStyleSheet("font-weight: bold; font-size: 14px; color: #333;");
-                             FindCredentialLayout->addWidget(alert);
+        string text = ServiceFind->text().toStdString();
+        bool found;
+        Credential cred = FileManager::findCredential("../Data/Data.txt", text, found);
 
-                             QLabel *svcLabel = new QLabel(QString::fromStdString("Service: " + cred.service));
-                             svcLabel->setAlignment(Qt::AlignLeft);
-                             FindCredentialLayout->addWidget(svcLabel);
+        // Clear old results
+        QLayoutItem *item;
+        while ((item = resultLayout->takeAt(0)) != nullptr) {
+            delete item->widget();
+            delete item;
+        }
 
-                             QLabel *userLabel = new QLabel(QString::fromStdString("Username: " + cred.username));
-                             userLabel->setAlignment(Qt::AlignLeft);
-                             FindCredentialLayout->addWidget(userLabel);
+        if (found) {
+            QLabel *alert = new QLabel("Credential found for this service.");
+            alert->setAlignment(Qt::AlignCenter);
+            alert->setStyleSheet("font-weight: bold; font-size: 14px; color: #333;");
+            resultLayout->addWidget(alert);
 
-                            // Password label (masked initially)
-                             QString masked = QString(cred.password.size(), QChar('*'));
-                             QLabel *passLabel = new QLabel(QString("Password: ") + masked);
-                             passLabel->setAlignment(Qt::AlignLeft);
-                             FindCredentialLayout->addWidget(passLabel);
+            QLabel *svcLabel = new QLabel(QString::fromStdString("Service: " + cred.service));
+            QLabel *userLabel = new QLabel(QString::fromStdString("Username: " + cred.username));
+            QString masked = QString(cred.password.size(), QChar('*'));
+            QLabel *passLabel = new QLabel("Password: " + masked);
 
-                             
-
-                         }
-                         else{
-                            QLabel *alert = new QLabel("Credential not Found!");
-                             alert->setAlignment(Qt::AlignCenter);
-                             alert->setStyleSheet("font-weight: bold; font-size: 14px; color: #d50505ff;");
-                             FindCredentialLayout->addWidget(alert);
-                         } });
+            resultLayout->addWidget(svcLabel);
+            resultLayout->addWidget(userLabel);
+            resultLayout->addWidget(passLabel);
+        } else {
+            QLabel *alert = new QLabel("Credential not found!");
+            alert->setAlignment(Qt::AlignCenter);
+            alert->setStyleSheet("font-weight: bold; font-size: 14px; color: #d50505ff;");
+            resultLayout->addWidget(alert);
+        } });
 
     QObject::connect(AddCredentialButton, &QPushButton::clicked, [=]()
                      {
                         string service = ServiceAdd->text().toStdString();
                         string user = usernameAdd->text().toStdString();
                         string pass = passwordAdd->text().toStdString();
-                        string ET = encryptionTypeAdd->currentText().toStdString();
+                        string ET = encryptCombo->currentText().toStdString();
                         string k = keyAdd->text().toStdString();
 
                         if (service.empty() || user.empty() || pass.empty()) {
                             QMessageBox::warning(AddCredentialPage, "Warning", "Please fill in service, username, and password.");
                             return;
                         }
-
-                        string finalPassword = pass;
-                        if (ET == "Vigenere" && !k.empty()) {
-                            finalPassword = Cipher::vigenereEncrypt(pass, k);
+                        
+                        int selectedIndex = encryptCombo->currentIndex();
+                        if ((selectedIndex == 1 || selectedIndex == 2) && k.empty()) {
+                            QMessageBox::warning(nullptr, "Warning", "Key cannot be empty for Caesar or Rail Fence cipher.");
+                            return;
                         }
+                        if ((selectedIndex == 1 || selectedIndex == 2) && !std::all_of(k.begin(), k.end(), ::isdigit)) {
+                            QMessageBox::warning(nullptr, "Warning", "Key must be numeric for Caesar or Rail Fence cipher.");
+                            return;
+                        }
+                        Cipher cipher;
+                        string encryptedPassword = cipher.Encrypt(pass, k, selectedIndex);
 
-                        Credential newCred{service, user, finalPassword};
+                        Credential newCred{service, user, encryptedPassword};
                         bool success = FileManager::saveCredential("../Data/Data.txt", newCred);
 
                         if (success) {
@@ -388,7 +401,7 @@ int main(int argc, char *argv[])
                             usernameAdd->clear();
                             passwordAdd->clear();
                             keyAdd->clear();
-                            encryptionTypeAdd->setCurrentIndex(0);
+                            encryptCombo->setCurrentIndex(0);
                         } else {
                             QMessageBox::critical(AddCredentialPage, "Error", "Failed to save credential.");
                         } });
@@ -413,7 +426,6 @@ int main(int argc, char *argv[])
                             usernameAdd->clear();
                             passwordAdd->clear();
                             keyAdd->clear();
-                            encryptionTypeAdd->setCurrentIndex(0);
                         } else {
                             QMessageBox::critical(DeleteCredentialPage, "Error", "Failed to save credential.");
                         } });
