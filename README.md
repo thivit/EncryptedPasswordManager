@@ -23,7 +23,8 @@ A simple C++ password manager that encrypts passwords before storing them.
 ## Prerequisites (Ubuntu/Debian)
 If Qt5 dev files aren’t installed, run:
 ```bash
-./scripts/install_qt.sh
+chmod +x ./install_qt.sh
+./install_qt.sh
 ```
 ## Build & Run
 ```bash
