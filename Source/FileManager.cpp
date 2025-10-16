@@ -101,7 +101,7 @@ bool                FileManager::updateCredential   (string filename, string ser
         if (line.rfind(service + ",", 0) == 0)
         {
             stringstream ss;
-            ss << service << "," << newCred.username << "," << newCred.password;
+            ss << newCred.service << "," << newCred.username << "," << newCred.password;
             lines.push_back(ss.str());
             updated = true;
         }
