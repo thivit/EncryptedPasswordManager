@@ -1,19 +1,12 @@
-# Build config
-CXX      = g++
-TARGET   = EncryptedPasswordManager
-SRCS     = $(wildcard Source/*.cpp)
-CXXFLAGS = -std=c++17 -Wall -Wextra -IInclude
-QTFLAGS = $(shell pkg-config --cflags --libs Qt5Widgets)
-
 .PHONY: all run clean
 
-all: $(TARGET)
+all: main
 
-$(TARGET): $(SRCS)
-	$(CXX) $(CXXFLAGS) $^ -o $@ $(QTFLAGS)
+main: Source/Main.cpp Source/Cipher.cpp Source/FileManager.cpp
+	@g++ -fPIC Source/Main.cpp Source/Cipher.cpp Source/FileManager.cpp -o main `pkg-config --cflags --libs Qt5Widgets`
 
 run: all
-	./$(TARGET)
+	@./main
 
 clean:
-	rm -f $(TARGET)
+	@rm -f main
