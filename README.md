@@ -12,7 +12,7 @@ A simple C++ password manager that encrypts passwords before storing them.
 ├─ Data/               # storage (service, username, encrypted password)
 ├─ Include/            # headers (Cipher.hpp, FileManager.hpp)
 ├─ Source/             # sources (Main.cpp, Cipher.cpp, FileManager.cpp)
-├─ install_qt.sh       # Ubuntu/Debian: installs build tools + Qt5 dev
+├─ install_qt.sh       # Ubuntu: installs build tools + Qt5 dev
 ├─ Makefile            # minimal build (uses pkg-config for Qt)
 └─ README.md
 ```
