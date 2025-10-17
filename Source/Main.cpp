@@ -28,14 +28,14 @@ int main(int argc, char *argv[])
     QWidget *frontPage = new QWidget();
     QVBoxLayout *frontLayout = new QVBoxLayout(frontPage);
 
-    QLabel *header = new QLabel("Welcome to Encryption Password Management");
+    QLabel *header = new QLabel("Encrypted Password Manager");
     header->setAlignment(Qt::AlignCenter);
     header->setStyleSheet("font-size: 18px; font-weight: bold; margin: 10px;");
 
-    QPushButton *addCredential = new QPushButton("Add Credential");
-    QPushButton *deleteCredential = new QPushButton("Delete Credential");
-    QPushButton *findCredential = new QPushButton("Find Credential");
-    QPushButton *updateCredential = new QPushButton("Update Credential");
+    QPushButton *addCredential = new QPushButton("New +");
+    QPushButton *deleteCredential = new QPushButton("Delete");
+    QPushButton *findCredential = new QPushButton("Find");
+    QPushButton *updateCredential = new QPushButton("Update");
 
     frontLayout->addWidget(header);
     frontLayout->addSpacing(20);
