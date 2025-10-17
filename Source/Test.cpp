@@ -9,7 +9,7 @@ int main() {
 
     // ===== CAESAR CIPHER =====
     plaintext = "HELLO WORLD";
-    int caesarShift = 3;
+    string caesarShift = "3";
 
     ciphertext = Cipher::caesarEncrypt(plaintext, caesarShift);
     decrypted = Cipher::caesarDecrypt(ciphertext, caesarShift);
@@ -34,7 +34,7 @@ int main() {
 
     // ===== RAIL FENCE CIPHER =====
     plaintext = "HELLO WORLD";
-    int rails = 4;
+    string rails = "4";
 
     ciphertext = Cipher::railFenceEncrypt(plaintext, rails);
     decrypted = Cipher::railFenceDecrypt(ciphertext, rails);
