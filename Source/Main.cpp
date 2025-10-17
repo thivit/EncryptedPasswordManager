@@ -209,7 +209,7 @@ int main(int argc, char *argv[])
 
     // ========== CONNECTIONS ==========
 
-    // Front buttons -> correct pages (fix: Add goes to Add page, not Check)
+    // Front buttons -> correct pages 
     QObject::connect(addCredential, &QPushButton::clicked, [&](){
         stack->setCurrentWidget(AddCredentialPage);
     });
@@ -284,18 +284,16 @@ int main(int argc, char *argv[])
             );
 
             if (choice == QMessageBox::Yes) {
-                // Prefill Add page with what the user already typed
+                // Prefill Add page 
                 ServiceAdd->setText(QString::fromStdString(service));
                 usernameAdd->setText(QString::fromStdString(user));
-                // For safety, you can clear password instead of pre-filling:
-                // passwordAdd->clear();
                 passwordAdd->setText(QString::fromStdString(pass));
                 encryptCombo->setCurrentIndex(selectedIndex);
                 keyAdd->setText(QString::fromStdString(k));
 
                 stack->setCurrentWidget(AddCredentialPage);
             }
-            return; // stop Update flow either way
+            return; 
         }
         // Key validation
         if (selectedIndex == 0) { // Vigenere
@@ -329,7 +327,6 @@ int main(int argc, char *argv[])
         bool found;
         FileManager::findCredential("Data/Data.txt", text, found);
 
-        // Clear any previous message/buttons, but keep the core widgets of THIS page
         for (int i = checkCredentialLayout->count() - 1; i >= 0; --i) {
             QWidget *w = checkCredentialLayout->itemAt(i)->widget();
             if (w && w != ServiceInput && w != Check && w != backBtnCheck) {
@@ -357,7 +354,7 @@ int main(int argc, char *argv[])
             checkCredentialLayout->addWidget(option1);
             checkCredentialLayout->addWidget(option2);
 
-            // Fix: go to UPDATE page (not Add)
+            // go to UPDATE page 
             QObject::connect(option1, &QPushButton::clicked, [=](){
                 ServiceUpdate->setText(QString::fromStdString(text)); // prefill service
                 stack->setCurrentWidget(updateCredentialPage);
@@ -447,7 +444,6 @@ int main(int argc, char *argv[])
                 }
             }
 
-            // Use your Cipher::Decrypt() wrapper
             Cipher cipher;
             std::string decrypted;
             try {
@@ -466,8 +462,6 @@ int main(int argc, char *argv[])
             QMessageBox::information(nullptr, "Password revealed",
                                     QString::fromStdString("Password: " + decrypted));
 
-            // Optional: unmask inline instead of popup
-            // passLabel->setText("Password: " + QString::fromStdString(decrypted));
         });
     });
 
@@ -489,12 +483,12 @@ int main(int argc, char *argv[])
         if (exists) {
             QMessageBox::information(AddCredentialPage, "Already exists",
                                     "A credential with this service already exists.\nRedirecting to Update…");
-            // prefill Update form with what we know
+            // prefill Update form 
             ServiceUpdate->setText(QString::fromStdString(service));
-            usernameUpdate->setText(QString::fromStdString(existing.username)); // ok if empty
-            passwordUpdate->clear();  // don’t prefill passwords
+            usernameUpdate->setText(QString::fromStdString(existing.username)); 
+            passwordUpdate->clear();  
             key->clear();
-            encryptionType->setCurrentIndex(0); // default to Vigenere (or keep current if you prefer)
+            encryptionType->setCurrentIndex(0);
             stack->setCurrentWidget(updateCredentialPage);
             return; // stop Add flow
         }
@@ -542,7 +536,7 @@ int main(int argc, char *argv[])
 
         if (success) {
             QMessageBox::information(DeleteCredentialPage, "Success", "Credential deleted successfully!");
-            ServiceDelete->clear(); // fix: clear the delete input, not the add fields
+            ServiceDelete->clear(); 
         } else {
             QMessageBox::critical(DeleteCredentialPage, "Error", "Failed to delete credential.");
         }
