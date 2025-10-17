@@ -10,8 +10,9 @@
 #include <QLabel>
 #include <QStackedWidget>
 #include <QHBoxLayout>
-#include "../Include/FileManager.hpp"
 #include <QMessageBox>
+#include <algorithm>
+#include <filesystem>
 using namespace std;
 
 // To compile:
@@ -20,6 +21,9 @@ using namespace std;
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
+
+    // Ensure Data/ exists for file IO
+    std::filesystem::create_directories("Data");
 
     // Create stacked widget to manage pages
     QStackedWidget *stack = new QStackedWidget();
@@ -45,7 +49,7 @@ int main(int argc, char *argv[])
     frontLayout->addWidget(updateCredential);
     frontLayout->addStretch();
 
-    //======== Check Credential page =======
+    // ======== Check Credential page =======
     QWidget *checkCredentialPage = new QWidget();
     QVBoxLayout *checkCredentialLayout = new QVBoxLayout(checkCredentialPage);
 
@@ -61,7 +65,7 @@ int main(int argc, char *argv[])
     checkCredentialLayout->addWidget(backBtnCheck);
     checkCredentialLayout->addStretch();
 
-    //======== Find Credential page =======
+    // ======== Find Credential page =======
     QWidget *FindCredentialPage = new QWidget();
     QVBoxLayout *FindCredentialLayout = new QVBoxLayout(FindCredentialPage);
 
@@ -80,7 +84,8 @@ int main(int argc, char *argv[])
     FindCredentialLayout->addWidget(backBtnFind);
     FindCredentialLayout->addWidget(resultContainer);
     FindCredentialLayout->addStretch();
-    //===========Update Credential page ===========
+
+    // =========== Update Credential page ===========
     QWidget *updateCredentialPage = new QWidget();
     QVBoxLayout *updateCredentialLayout = new QVBoxLayout(updateCredentialPage);
 
@@ -110,7 +115,7 @@ int main(int argc, char *argv[])
     updateCredentialLayout->addStretch();
     updateCredentialLayout->addWidget(backBtnUpdate);
 
-    //===========Add Credential page ===========
+    // =========== Add Credential page ===========
     QWidget *AddCredentialPage = new QWidget();
     QVBoxLayout *AddCredentialLayout = new QVBoxLayout(AddCredentialPage);
 
@@ -132,12 +137,9 @@ int main(int argc, char *argv[])
     QPushButton *AddCredentialButton = new QPushButton("Add Credential");
     QPushButton *backBtnAdd = new QPushButton("← Back to Home");
 
-
-
     AddCredentialLayout->addWidget(ServiceAdd);
     AddCredentialLayout->addWidget(usernameAdd);
     AddCredentialLayout->addWidget(passwordAdd);
-
     AddCredentialLayout->addWidget(keyAdd);
     AddCredentialLayout->addWidget(encryptLabel);
     AddCredentialLayout->addWidget(encryptCombo);
@@ -146,7 +148,7 @@ int main(int argc, char *argv[])
     AddCredentialLayout->addStretch();
     AddCredentialLayout->addWidget(backBtnAdd);
 
-    //===========Delete Credential page ===========
+    // =========== Delete Credential page ===========
     QWidget *DeleteCredentialPage = new QWidget();
     QVBoxLayout *DeleteCredentialLayout = new QVBoxLayout(DeleteCredentialPage);
 
@@ -189,13 +191,13 @@ int main(int argc, char *argv[])
     layout->addWidget(generateBtn);
 
     // Add pages to stack
-    stack->addWidget(frontPage);   // index 0
-    stack->addWidget(featurePage); // index 1
-    stack->addWidget(checkCredentialPage);
-    stack->addWidget(updateCredentialPage);
-    stack->addWidget(AddCredentialPage);
-    stack->addWidget(DeleteCredentialPage);
-    stack->addWidget(FindCredentialPage);
+    stack->addWidget(frontPage);          // index 0
+    stack->addWidget(featurePage);        // index 1
+    stack->addWidget(checkCredentialPage);// index 2
+    stack->addWidget(updateCredentialPage);// index 3
+    stack->addWidget(AddCredentialPage);  // index 4
+    stack->addWidget(DeleteCredentialPage);// index 5
+    stack->addWidget(FindCredentialPage); // index 6
 
     // Show initial front page
     QWidget window;
@@ -206,134 +208,146 @@ int main(int argc, char *argv[])
     window.show();
 
     // ========== CONNECTIONS ==========
-    QObject::connect(addCredential, &QPushButton::clicked, [&]()
-                     { stack->setCurrentWidget(checkCredentialPage); });
-    QObject::connect(updateCredential, &QPushButton::clicked, [&]()
-                     { stack->setCurrentWidget(updateCredentialPage); });
-    QObject::connect(deleteCredential, &QPushButton::clicked, [&]()
-                     { stack->setCurrentWidget(DeleteCredentialPage); });
-    QObject::connect(findCredential, &QPushButton::clicked, [&]()
-                     { stack->setCurrentWidget(FindCredentialPage); });
 
-    auto goToFeaturePage = [stack]()
-    { stack->setCurrentIndex(1); };
+    // Front buttons -> correct pages (fix: Add goes to Add page, not Check)
+    QObject::connect(addCredential, &QPushButton::clicked, [&](){
+        stack->setCurrentWidget(AddCredentialPage);
+    });
+    QObject::connect(updateCredential, &QPushButton::clicked, [&](){
+        stack->setCurrentWidget(updateCredentialPage);
+    });
+    QObject::connect(deleteCredential, &QPushButton::clicked, [&](){
+        stack->setCurrentWidget(DeleteCredentialPage);
+    });
+    QObject::connect(findCredential, &QPushButton::clicked, [&](){
+        stack->setCurrentWidget(FindCredentialPage);
+    });
 
-    // ======= Back buttons for each page ========
-    QObject::connect(backBtnCheck, &QPushButton::clicked, [stack]()
-                     { stack->setCurrentIndex(0); });
-    QObject::connect(backBtnUpdate, &QPushButton::clicked, [stack]()
-                     { stack->setCurrentIndex(0); });
-    QObject::connect(backBtnAdd, &QPushButton::clicked, [stack]()
-                     { stack->setCurrentIndex(0); });
-    QObject::connect(backBtnDelete, &QPushButton::clicked, [stack]()
-                     { stack->setCurrentIndex(0); });
-    QObject::connect(backBtnFind, &QPushButton::clicked, [stack]()
-                     { stack->setCurrentIndex(0); });
+    // Back buttons
+    QObject::connect(backBtnCheck,  &QPushButton::clicked, [stack](){ stack->setCurrentIndex(0); });
+    QObject::connect(backBtnUpdate, &QPushButton::clicked, [stack](){ stack->setCurrentIndex(0); });
+    QObject::connect(backBtnAdd,    &QPushButton::clicked, [stack](){ stack->setCurrentIndex(0); });
+    QObject::connect(backBtnDelete, &QPushButton::clicked, [stack](){ stack->setCurrentIndex(0); });
+    QObject::connect(backBtnFind,   &QPushButton::clicked, [stack](){ stack->setCurrentIndex(0); });
 
-    QObject::connect(generateBtn, &QPushButton::clicked, [=]()
-                     {
+    // Encrypt/Decrypt demo page
+    QObject::connect(generateBtn, &QPushButton::clicked, [=](){
         QString choice = dropbox->currentText();
         string text = input->text().toStdString();
         string keyText = key1->text().toStdString();
 
+        if (text.empty()) {
+            QMessageBox::warning(nullptr, "Warning", "Input cannot be empty.");
+            return;
+        }
+
         if (choice == "Encrypt") {
+            if (keyText.empty()) {
+                QMessageBox::warning(nullptr, "Warning", "Key cannot be empty.");
+                return;
+            }
             string ciphertext = Cipher::vigenereEncrypt(text, keyText);
             res->setText(QString::fromStdString(ciphertext));
             FileManager::writeToFile("encrypted.txt", ciphertext);
         } else {
+            if (keyText.empty()) {
+                QMessageBox::warning(nullptr, "Warning", "Key cannot be empty.");
+                return;
+            }
             string plaintext = Cipher::vigenereDecrypt(text, keyText);
             res->setText(QString::fromStdString(plaintext));
             FileManager::writeToFile("decrypted.txt", plaintext);
-        } });
+        }
+    });
 
-    QObject::connect(updateCredentialButton, &QPushButton::clicked, [=]()
-                     {
-                         string service = ServiceUpdate->text().toStdString();
-                         string user = usernameUpdate->text().toStdString();
-                         string pass = passwordUpdate->text().toStdString();
-                         string ET = encryptionType->currentText().toStdString();
-                         string k = key->text().toStdString();
+    // Update credential
+    QObject::connect(updateCredentialButton, &QPushButton::clicked, [=](){
+        string service = ServiceUpdate->text().toStdString();
+        string user    = usernameUpdate->text().toStdString();
+        string pass    = passwordUpdate->text().toStdString();
+        int selectedIndex = encryptionType->currentIndex(); // 0=Vigenere, 1=Caesar, 2=Rail
+        string k = key->text().toStdString();
 
-                         if(service.empty() || user.empty() || pass.empty()){
-                            QMessageBox::warning(nullptr,"Warning","Please fill in service, username, and password.");
-                            return;
-                         }
-                        int selectedIndex = encryptionType->currentIndex();
-                        if ((selectedIndex == 1 || selectedIndex == 2) && k.empty()) {
-                            QMessageBox::warning(nullptr, "Warning", "Key cannot be empty for Caesar or Rail Fence cipher.");
-                            return;
-                        }
-                        if ((selectedIndex == 1 || selectedIndex == 2) && !std::all_of(k.begin(), k.end(), ::isdigit)) {
-                            QMessageBox::warning(nullptr, "Warning", "Key must be numeric for Caesar or Rail Fence cipher.");
-                            return;
-                        }
-                        
-                        Cipher cipher;
-                        string encryptedPassword = cipher.Encrypt(pass, k, selectedIndex);
+        if(service.empty() || user.empty() || pass.empty()){
+            QMessageBox::warning(nullptr,"Warning","Please fill in service, username, and password.");
+            return;
+        }
+        // Key validation
+        if (selectedIndex == 0) { // Vigenere
+            if (k.empty()) { QMessageBox::warning(nullptr,"Warning","Key cannot be empty for Vigenere."); return; }
+            if (!std::all_of(k.begin(), k.end(), [](unsigned char ch){ return std::isalpha(ch); })) {
+                QMessageBox::warning(nullptr,"Warning","Key must be alphabetic for Vigenere."); return;
+            }
+        } else { // Caesar / Rail -> numeric
+            if (k.empty()) { QMessageBox::warning(nullptr,"Warning","Key cannot be empty for Caesar or Rail."); return; }
+            if (!std::all_of(k.begin(), k.end(), ::isdigit)) {
+                QMessageBox::warning(nullptr,"Warning","Key must be numeric for Caesar or Rail."); return;
+            }
+        }
 
-                        Credential newCred{service, user, encryptedPassword};
+        Cipher cipher;
+        string encryptedPassword = cipher.Encrypt(pass, k, selectedIndex);
+        Credential newCred{service, user, encryptedPassword};
+        bool success = FileManager::updateCredential("Data/Data.txt", service, newCred);
 
-                        bool success = FileManager::updateCredential("Data/Data.txt", service, newCred);
+        if (success) {
+            QMessageBox::information(nullptr, "Success", "Credential updated successfully!");
+            stack->setCurrentWidget(frontPage);
+        } else {
+            QMessageBox::critical(nullptr, "Error", "Failed to update credential. Make sure the service exists in the file.");
+        }
+    });
 
-                        if (success) {
-                            QMessageBox::information(nullptr, "Success", "Credential updated successfully!");
-                            stack->setCurrentWidget(frontPage);
-                        } else {
-                            QMessageBox::critical(nullptr, "Error", "Failed to update credential. Make sure the service exists in the file.");
-                        } });
+    // Check credential (exists?)
+    QObject::connect(Check, &QPushButton::clicked, [=](){
+        string text = ServiceInput->text().toStdString();
+        bool found;
+        FileManager::findCredential("Data/Data.txt", text, found);
 
-    QObject::connect(Check, &QPushButton::clicked, [=]()
-                     {
-                         string text = ServiceInput->text().toStdString();
-                         bool found;
-                         FileManager::findCredential("Data/Data.txt", text, found);
-                             // Clear any previous message/buttons
-                        QLayoutItem *item;
-                        while ((item = checkCredentialLayout->takeAt(checkCredentialLayout->count() - 1)) != nullptr) {
-                            if (item->widget() != backBtnFind && item->widget() != ServiceInput && item->widget() != Check)
-                                delete item->widget();
-                            delete item;
-                        }
-                        checkCredentialLayout->addSpacing(10);
-                         if (found)
-                         {
-                             QLabel *alert = new QLabel("Credential found for this service. Do you want to update it?");
-                             alert->setAlignment(Qt::AlignCenter);
-                             alert->setStyleSheet("font-weight: bold; font-size: 14px; color: #333;");
+        // Clear any previous message/buttons, but keep the core widgets of THIS page
+        for (int i = checkCredentialLayout->count() - 1; i >= 0; --i) {
+            QWidget *w = checkCredentialLayout->itemAt(i)->widget();
+            if (w && w != ServiceInput && w != Check && w != backBtnCheck) {
+                checkCredentialLayout->removeWidget(w);
+                w->deleteLater();
+            }
+        }
+        checkCredentialLayout->addSpacing(10);
 
-                             QPushButton *option1 = new QPushButton("Yes");
-                             QPushButton *option2 = new QPushButton("No");
-                             option1->setStyleSheet(
-                                "QPushButton { background-color: #4CAF50; color: white; font-weight: bold; padding: 6px 20px; border-radius: 6px; }"
-                                "QPushButton:hover { background-color: #45a049; }");
-                             option2->setStyleSheet(
-                                "QPushButton { background-color: #f44336; color: white; font-weight: bold; padding: 6px 20px; border-radius: 6px; }"
-                                "QPushButton:hover { background-color: #e53935; }");
+        if (found) {
+            QLabel *alert = new QLabel("Credential found for this service. Do you want to update it?");
+            alert->setAlignment(Qt::AlignCenter);
+            alert->setStyleSheet("font-weight: bold; font-size: 14px; color: #333;");
 
-                             checkCredentialLayout->addWidget(alert);
-                             checkCredentialLayout->addWidget(option1);
-                             checkCredentialLayout->addWidget(option2);
+            QPushButton *option1 = new QPushButton("Yes");
+            QPushButton *option2 = new QPushButton("No");
+            option1->setStyleSheet(
+                "QPushButton { background-color: #4CAF50; color: white; font-weight: bold; padding: 6px 20px; border-radius: 6px; }"
+                "QPushButton:hover { background-color: #45a049; }");
+            option2->setStyleSheet(
+                "QPushButton { background-color: #f44336; color: white; font-weight: bold; padding: 6px 20px; border-radius: 6px; }"
+                "QPushButton:hover { background-color: #e53935; }");
 
+            checkCredentialLayout->addWidget(alert);
+            checkCredentialLayout->addWidget(option1);
+            checkCredentialLayout->addWidget(option2);
 
-                            QObject::connect(option1, &QPushButton::clicked, [=]()
-                            {
-                                stack->setCurrentWidget(AddCredentialPage);
-                            });
+            // Fix: go to UPDATE page (not Add)
+            QObject::connect(option1, &QPushButton::clicked, [=](){
+                ServiceUpdate->setText(QString::fromStdString(text)); // prefill service
+                stack->setCurrentWidget(updateCredentialPage);
+            });
+            QObject::connect(option2, &QPushButton::clicked, [=](){
+                stack->setCurrentWidget(frontPage);
+            });
+        } else {
+            // Not found -> go to Add page directly
+            stack->setCurrentWidget(AddCredentialPage);
+        }
+    });
 
-                            QObject::connect(option2, &QPushButton::clicked, [=]()
-                            {
-                                stack->setCurrentWidget(frontPage);
-                            });
-
-                             
-
-                         }
-                         else{
-                            stack->setCurrentWidget(AddCredentialPage);
-                         } });
-
-    QObject::connect(Find, &QPushButton::clicked, [=]()
-                     {
+    // Find credential (show masked password)
+    QObject::connect(Find, &QPushButton::clicked, [=](){
         string text = ServiceFind->text().toStdString();
         bool found;
         Credential cred = FileManager::findCredential("Data/Data.txt", text, found);
@@ -341,7 +355,7 @@ int main(int argc, char *argv[])
         // Clear old results
         QLayoutItem *item;
         while ((item = resultLayout->takeAt(0)) != nullptr) {
-            delete item->widget();
+            if (item->widget()) item->widget()->deleteLater();
             delete item;
         }
 
@@ -364,70 +378,70 @@ int main(int argc, char *argv[])
             alert->setAlignment(Qt::AlignCenter);
             alert->setStyleSheet("font-weight: bold; font-size: 14px; color: #d50505ff;");
             resultLayout->addWidget(alert);
-        } });
+        }
+    });
 
-    QObject::connect(AddCredentialButton, &QPushButton::clicked, [=]()
-                     {
-                        string service = ServiceAdd->text().toStdString();
-                        string user = usernameAdd->text().toStdString();
-                        string pass = passwordAdd->text().toStdString();
-                        string ET = encryptCombo->currentText().toStdString();
-                        string k = keyAdd->text().toStdString();
+    // Add credential
+    QObject::connect(AddCredentialButton, &QPushButton::clicked, [=](){
+        string service = ServiceAdd->text().toStdString();
+        string user    = usernameAdd->text().toStdString();
+        string pass    = passwordAdd->text().toStdString();
+        int selectedIndex = encryptCombo->currentIndex(); // 0=Vigenere, 1=Caesar, 2=Rail
+        string k = keyAdd->text().toStdString();
 
-                        if (service.empty() || user.empty() || pass.empty()) {
-                            QMessageBox::warning(AddCredentialPage, "Warning", "Please fill in service, username, and password.");
-                            return;
-                        }
-                        
-                        int selectedIndex = encryptCombo->currentIndex();
-                        if ((selectedIndex == 1 || selectedIndex == 2) && k.empty()) {
-                            QMessageBox::warning(nullptr, "Warning", "Key cannot be empty for Caesar or Rail Fence cipher.");
-                            return;
-                        }
-                        if ((selectedIndex == 1 || selectedIndex == 2) && !std::all_of(k.begin(), k.end(), ::isdigit)) {
-                            QMessageBox::warning(nullptr, "Warning", "Key must be numeric for Caesar or Rail Fence cipher.");
-                            return;
-                        }
-                        Cipher cipher;
-                        string encryptedPassword = cipher.Encrypt(pass, k, selectedIndex);
+        if (service.empty() || user.empty() || pass.empty()) {
+            QMessageBox::warning(AddCredentialPage, "Warning", "Please fill in service, username, and password.");
+            return;
+        }
+        // Key validation
+        if (selectedIndex == 0) { // Vigenere
+            if (k.empty()) { QMessageBox::warning(nullptr,"Warning","Key cannot be empty for Vigenere."); return; }
+            if (!std::all_of(k.begin(), k.end(), [](unsigned char ch){ return std::isalpha(ch); })) {
+                QMessageBox::warning(nullptr,"Warning","Key must be alphabetic for Vigenere."); return;
+            }
+        } else { // Caesar / Rail -> numeric
+            if (k.empty()) { QMessageBox::warning(nullptr,"Warning","Key cannot be empty for Caesar or Rail."); return; }
+            if (!std::all_of(k.begin(), k.end(), ::isdigit)) {
+                QMessageBox::warning(nullptr,"Warning","Key must be numeric for Caesar or Rail."); return;
+            }
+        }
 
-                        Credential newCred{service, user, encryptedPassword};
-                        bool success = FileManager::saveCredential("Data/Data.txt", newCred);
+        Cipher cipher;
+        string encryptedPassword = cipher.Encrypt(pass, k, selectedIndex);
+        Credential newCred{service, user, encryptedPassword};
+        bool success = FileManager::saveCredential("Data/Data.txt", newCred);
 
-                        if (success) {
-                            QMessageBox::information(AddCredentialPage, "Success", "Credential added successfully!");
-                            // Optionally clear inputs
-                            ServiceAdd->clear();
-                            usernameAdd->clear();
-                            passwordAdd->clear();
-                            keyAdd->clear();
-                            encryptCombo->setCurrentIndex(0);
-                        } else {
-                            QMessageBox::critical(AddCredentialPage, "Error", "Failed to save credential.");
-                        } });
+        if (success) {
+            QMessageBox::information(AddCredentialPage, "Success", "Credential added successfully!");
+            // Clear inputs
+            ServiceAdd->clear();
+            usernameAdd->clear();
+            passwordAdd->clear();
+            keyAdd->clear();
+            encryptCombo->setCurrentIndex(0);
+        } else {
+            QMessageBox::critical(AddCredentialPage, "Error", "Failed to save credential.");
+        }
+    });
 
-    QObject::connect(DeleteCredentialButton, &QPushButton::clicked, [=]()
-                     {
-                        string service = ServiceDelete->text().toStdString();
+    // Delete credential
+    QObject::connect(DeleteCredentialButton, &QPushButton::clicked, [=](){
+        string service = ServiceDelete->text().toStdString();
 
-                        if (service.empty()) {
-                            QMessageBox::warning(DeleteCredentialPage, "Warning", "Please fill in service");
-                            return;
-                        }
+        if (service.empty()) {
+            QMessageBox::warning(DeleteCredentialPage, "Warning", "Please fill in service");
+            return;
+        }
 
+        bool success = FileManager::deleteCredential("Data/Data.txt", service);
 
-                        // Credential newCred{service, user, pass};
-                        bool success = FileManager::deleteCredential("Data/Data.txt", service);
+        if (success) {
+            QMessageBox::information(DeleteCredentialPage, "Success", "Credential deleted successfully!");
+            ServiceDelete->clear(); // fix: clear the delete input, not the add fields
+        } else {
+            QMessageBox::critical(DeleteCredentialPage, "Error", "Failed to delete credential.");
+        }
+    });
 
-                        if (success) {
-                            QMessageBox::information(DeleteCredentialPage, "Success", "Credential deleted successfully!");
-                            // Optionally clear inputs
-                            ServiceAdd->clear();
-                            usernameAdd->clear();
-                            passwordAdd->clear();
-                            keyAdd->clear();
-                        } else {
-                            QMessageBox::critical(DeleteCredentialPage, "Error", "Failed to save credential.");
-                        } });
     return app.exec();
 }
