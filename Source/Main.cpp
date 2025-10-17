@@ -347,38 +347,103 @@ int main(int argc, char *argv[])
     });
 
     // Find credential (show masked password)
-    QObject::connect(Find, &QPushButton::clicked, [=](){
-        string text = ServiceFind->text().toStdString();
-        bool found;
-        Credential cred = FileManager::findCredential("Data/Data.txt", text, found);
+    QObject::connect(Find, &QPushButton::clicked, [=]() {
+        std::string service = ServiceFind->text().toStdString();
+        bool found = false;
+        Credential cred = FileManager::findCredential("Data/Data.txt", service, found);
 
-        // Clear old results
-        QLayoutItem *item;
-        while ((item = resultLayout->takeAt(0)) != nullptr) {
-            if (item->widget()) item->widget()->deleteLater();
-            delete item;
+        // Clear previous results
+        QLayoutItem *it;
+        while ((it = resultLayout->takeAt(0)) != nullptr) {
+            if (it->widget()) it->widget()->deleteLater();
+            delete it;
         }
 
-        if (found) {
-            QLabel *alert = new QLabel("Credential found for this service.");
-            alert->setAlignment(Qt::AlignCenter);
-            alert->setStyleSheet("font-weight: bold; font-size: 14px; color: #333;");
-            resultLayout->addWidget(alert);
-
-            QLabel *svcLabel = new QLabel(QString::fromStdString("Service: " + cred.service));
-            QLabel *userLabel = new QLabel(QString::fromStdString("Username: " + cred.username));
-            QString masked = QString(cred.password.size(), QChar('*'));
-            QLabel *passLabel = new QLabel("Password: " + masked);
-
-            resultLayout->addWidget(svcLabel);
-            resultLayout->addWidget(userLabel);
-            resultLayout->addWidget(passLabel);
-        } else {
+        if (!found) {
             QLabel *alert = new QLabel("Credential not found!");
             alert->setAlignment(Qt::AlignCenter);
             alert->setStyleSheet("font-weight: bold; font-size: 14px; color: #d50505ff;");
             resultLayout->addWidget(alert);
+            return;
         }
+
+        // Display service and username, mask the password
+        QLabel *svcLabel  = new QLabel(QString::fromStdString("Service: "  + cred.service));
+        QLabel *userLabel = new QLabel(QString::fromStdString("Username: " + cred.username));
+        QString masked(cred.password.size(), QChar('*'));
+        QLabel *passLabel = new QLabel("Password: " + masked);
+
+        resultLayout->addWidget(svcLabel);
+        resultLayout->addWidget(userLabel);
+        resultLayout->addWidget(passLabel);
+
+        // Add UI for revealing password
+        QLabel *prompt = new QLabel("To reveal password, select the original method and enter the key:");
+        prompt->setStyleSheet("font-style: italic; margin-top:6px;");
+        resultLayout->addWidget(prompt);
+
+        QComboBox *methodBox = new QComboBox();
+        methodBox->addItem("Vigenere Cipher");   // index 0
+        methodBox->addItem("Caesar Cipher");     // index 1
+        methodBox->addItem("Rail Fence Cipher"); // index 2
+
+        QLineEdit *keyEdit = new QLineEdit();
+        keyEdit->setPlaceholderText("Key (alphabetic for Vigenere; numeric for Caesar/Rail)");
+
+        QPushButton *revealBtn = new QPushButton("Reveal Password");
+
+        resultLayout->addWidget(methodBox);
+        resultLayout->addWidget(keyEdit);
+        resultLayout->addWidget(revealBtn);
+
+        // Reveal password handler
+        QObject::connect(revealBtn, &QPushButton::clicked, [=]() {
+            int methodIndex = methodBox->currentIndex();  // 0=Vigenere, 1=Caesar, 2=Rail
+            std::string key = keyEdit->text().toStdString();
+
+            // Validate key type for chosen cipher
+            if (methodIndex == 0) { // Vigenere
+                if (key.empty()) {
+                    QMessageBox::warning(nullptr, "Warning", "Key cannot be empty for Vigenere.");
+                    return;
+                }
+                if (!std::all_of(key.begin(), key.end(), [](unsigned char ch){ return std::isalpha(ch); })) {
+                    QMessageBox::warning(nullptr, "Warning", "Vigenere key must be alphabetic.");
+                    return;
+                }
+            } else { // Caesar or Rail
+                if (key.empty()) {
+                    QMessageBox::warning(nullptr, "Warning", "Key cannot be empty for Caesar or Rail.");
+                    return;
+                }
+                if (!std::all_of(key.begin(), key.end(), ::isdigit)) {
+                    QMessageBox::warning(nullptr, "Warning", "Key must be numeric for Caesar or Rail.");
+                    return;
+                }
+            }
+
+            // Use your Cipher::Decrypt() wrapper
+            Cipher cipher;
+            std::string decrypted;
+            try {
+                decrypted = cipher.Decrypt(cred.password, key, methodIndex);
+            } catch (...) {
+                QMessageBox::critical(nullptr, "Error", "Decryption failed (exception).");
+                return;
+            }
+
+            if (decrypted.empty()) {
+                QMessageBox::warning(nullptr, "Warning", "Decryption produced empty output. Method or key may be incorrect.");
+                return;
+            }
+
+            // Show plaintext password
+            QMessageBox::information(nullptr, "Password revealed",
+                                    QString::fromStdString("Password: " + decrypted));
+
+            // Optional: unmask inline instead of popup
+            // passLabel->setText("Password: " + QString::fromStdString(decrypted));
+        });
     });
 
     // Add credential
