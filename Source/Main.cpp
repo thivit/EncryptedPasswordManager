@@ -393,6 +393,21 @@ int main(int argc, char *argv[])
             QMessageBox::warning(AddCredentialPage, "Warning", "Please fill in service, username, and password.");
             return;
         }
+        // Check if credential already exists
+        bool exists = false;
+        Credential existing = FileManager::findCredential("Data/Data.txt", service, exists);
+        if (exists) {
+            QMessageBox::information(AddCredentialPage, "Already exists",
+                                    "A credential with this service already exists.\nRedirecting to Update…");
+            // prefill Update form with what we know
+            ServiceUpdate->setText(QString::fromStdString(service));
+            usernameUpdate->setText(QString::fromStdString(existing.username)); // ok if empty
+            passwordUpdate->clear();  // don’t prefill passwords
+            key->clear();
+            encryptionType->setCurrentIndex(0); // default to Vigenere (or keep current if you prefer)
+            stack->setCurrentWidget(updateCredentialPage);
+            return; // stop Add flow
+        }
         // Key validation
         if (selectedIndex == 0) { // Vigenere
             if (k.empty()) { QMessageBox::warning(nullptr,"Warning","Key cannot be empty for Vigenere."); return; }
