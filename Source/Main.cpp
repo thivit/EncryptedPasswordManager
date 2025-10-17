@@ -273,7 +273,7 @@ int main(int argc, char *argv[])
 
                         Credential newCred{service, user, encryptedPassword};
 
-                        bool success = FileManager::updateCredential("../Data/Data.txt", service, newCred);
+                        bool success = FileManager::updateCredential("Data/Data.txt", service, newCred);
 
                         if (success) {
                             QMessageBox::information(nullptr, "Success", "Credential updated successfully!");
@@ -286,7 +286,7 @@ int main(int argc, char *argv[])
                      {
                          string text = ServiceInput->text().toStdString();
                          bool found;
-                         FileManager::findCredential("../Data/Data.txt", text, found);
+                         FileManager::findCredential("Data/Data.txt", text, found);
                              // Clear any previous message/buttons
                         QLayoutItem *item;
                         while ((item = checkCredentialLayout->takeAt(checkCredentialLayout->count() - 1)) != nullptr) {
@@ -336,7 +336,7 @@ int main(int argc, char *argv[])
                      {
         string text = ServiceFind->text().toStdString();
         bool found;
-        Credential cred = FileManager::findCredential("../Data/Data.txt", text, found);
+        Credential cred = FileManager::findCredential("Data/Data.txt", text, found);
 
         // Clear old results
         QLayoutItem *item;
@@ -392,7 +392,7 @@ int main(int argc, char *argv[])
                         string encryptedPassword = cipher.Encrypt(pass, k, selectedIndex);
 
                         Credential newCred{service, user, encryptedPassword};
-                        bool success = FileManager::saveCredential("../Data/Data.txt", newCred);
+                        bool success = FileManager::saveCredential("Data/Data.txt", newCred);
 
                         if (success) {
                             QMessageBox::information(AddCredentialPage, "Success", "Credential added successfully!");
@@ -417,7 +417,7 @@ int main(int argc, char *argv[])
 
 
                         // Credential newCred{service, user, pass};
-                        bool success = FileManager::deleteCredential("../Data/Data.txt", service);
+                        bool success = FileManager::deleteCredential("Data/Data.txt", service);
 
                         if (success) {
                             QMessageBox::information(DeleteCredentialPage, "Success", "Credential deleted successfully!");

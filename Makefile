@@ -3,10 +3,10 @@
 all: main
 
 main: Source/Main.cpp Source/Cipher.cpp Source/FileManager.cpp
-	@g++ -fPIC Source/Main.cpp Source/Cipher.cpp Source/FileManager.cpp -o main `pkg-config --cflags --libs Qt5Widgets`
+	@g++ -fPIC Source/Main.cpp Source/Cipher.cpp Source/FileManager.cpp -o EncryptedPasswordManager `pkg-config --cflags --libs Qt5Widgets`
 
 run: all
-	@./main
+	@./EncryptedPasswordManager
 
 clean:
-	@rm -f main
+	@rm -f EncryptedPasswordManager
