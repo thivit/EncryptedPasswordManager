@@ -272,6 +272,31 @@ int main(int argc, char *argv[])
             QMessageBox::warning(nullptr,"Warning","Please fill in service, username, and password.");
             return;
         }
+        // check existence before validating key/encrypting 
+        bool exists = false;
+        (void)FileManager::findCredential("Data/Data.txt", service, exists);
+        if (!exists) {
+            auto choice = QMessageBox::question(
+                updateCredentialPage,
+                "Credential not found",
+                "Credential does not exist. Would you like to add it?",
+                QMessageBox::Yes | QMessageBox::No
+            );
+
+            if (choice == QMessageBox::Yes) {
+                // Prefill Add page with what the user already typed
+                ServiceAdd->setText(QString::fromStdString(service));
+                usernameAdd->setText(QString::fromStdString(user));
+                // For safety, you can clear password instead of pre-filling:
+                // passwordAdd->clear();
+                passwordAdd->setText(QString::fromStdString(pass));
+                encryptCombo->setCurrentIndex(selectedIndex);
+                keyAdd->setText(QString::fromStdString(k));
+
+                stack->setCurrentWidget(AddCredentialPage);
+            }
+            return; // stop Update flow either way
+        }
         // Key validation
         if (selectedIndex == 0) { // Vigenere
             if (k.empty()) { QMessageBox::warning(nullptr,"Warning","Key cannot be empty for Vigenere."); return; }
