@@ -5,16 +5,14 @@
 #include <vector>
 using namespace std;
 
-struct Credential 
-{
+struct Credential {
     string service;
     string username;
     string password;
 };
 
-class FileManager 
-{
-public:
+class FileManager {
+    public:
     // utility / general functions
     static bool writeToFile (string filename, string line);  
     static vector<string> readFromFile (string filename); 
