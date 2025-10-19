@@ -6,7 +6,7 @@
 #include <iostream>     
 
 // general functions
-bool                FileManager::writeToFile        (string filename, string line)
+bool FileManager::writeToFile (string filename, string line)
 {
     ofstream file(filename, ios::app);
     if (!file.is_open())
@@ -16,7 +16,7 @@ bool                FileManager::writeToFile        (string filename, string lin
 
     return true;
 }
-vector<string>      FileManager::readFromFile       (string filename)
+vector<string> FileManager::readFromFile (string filename)
 {
     vector<string> lines;
     string line;
@@ -29,7 +29,7 @@ vector<string>      FileManager::readFromFile       (string filename)
 }
 
 // credential functions
-bool                FileManager::saveCredential     (string filename, Credential cred)
+bool FileManager::saveCredential (string filename, Credential cred)
 {
     ofstream file(filename, ios::app);
     if (!file.is_open())
@@ -39,29 +39,7 @@ bool                FileManager::saveCredential     (string filename, Credential
 
     return true;
 }
-vector<Credential>  FileManager::loadCredentials    (string filename)
-{
-    vector<Credential> creds;
-    string line;
-
-    ifstream file(filename);
-    while (getline(file, line)) 
-    {
-        stringstream ss(line);
-        string service;
-        string username;
-        string password;
-        
-        if (getline(ss, service, ',') && 
-            getline(ss, username, ',' ) && 
-            getline(ss, password, ',')) {
-                creds.push_back({service, username, password});
-            }
-    }
-
-    return creds;
-}
-bool                FileManager::deleteCredential   (string filename, string service)
+bool FileManager::deleteCredential (string filename, string service)
 {
     ifstream file(filename);
     if (!file.is_open())
@@ -86,7 +64,7 @@ bool                FileManager::deleteCredential   (string filename, string ser
 
      return found;
 }
-bool                FileManager::updateCredential   (string filename, string service, Credential newCred)
+bool FileManager::updateCredential (string filename, string service, Credential newCred)
 {
     ifstream file(filename);
     if (!file.is_open())
@@ -125,7 +103,7 @@ bool                FileManager::updateCredential   (string filename, string ser
 
     return true;
 }
-Credential          FileManager::findCredential     (string filename, string service, bool& found)
+Credential FileManager::findCredential (string filename, string service, bool& found)
 {
     ifstream file(filename);
     
@@ -161,7 +139,7 @@ Credential          FileManager::findCredential     (string filename, string ser
 
     return cred;
 }
-vector<string>      FileManager::listServices       (string filename)
+vector<string> FileManager::listServices (string filename)
 {
     ifstream file(filename);
     
@@ -181,4 +159,26 @@ vector<string>      FileManager::listServices       (string filename)
     }
 
     return services;
+}
+vector<Credential> FileManager::loadCredentials (string filename)
+{
+    vector<Credential> creds;
+    string line;
+
+    ifstream file(filename);
+    while (getline(file, line)) 
+    {
+        stringstream ss(line);
+        string service;
+        string username;
+        string password;
+        
+        if (getline(ss, service, ',') && 
+            getline(ss, username, ',' ) && 
+            getline(ss, password, ',')) {
+                creds.push_back({service, username, password});
+            }
+    }
+
+    return creds;
 }
