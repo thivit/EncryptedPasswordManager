@@ -5,25 +5,27 @@
 #include <vector>
 using namespace std;
 
-struct Credential {
+struct Credential 
+{
     string service;
     string username;
     string password;
 };
 
-class FileManager {
+class FileManager 
+{
 public:
     // utility / general functions
-    static bool                 writeToFile         (string filename, string line);  
-    static vector<string>       readFromFile        (string filename); 
+    static bool writeToFile (string filename, string line);  
+    static vector<string> readFromFile (string filename); 
     
     // credential functions
-    static bool                 saveCredential      (string filename, Credential cred);
-    static vector<Credential>   loadCredentials     (string filename);
-    static bool                 deleteCredential    (string filename, string service);
-    static bool                 updateCredential    (string filename, string service, Credential newCredy);
-    static Credential           findCredential      (string filename, string service, bool& found);
-    static vector<string>       listServices        (string filename);
+    static bool saveCredential (string filename, Credential cred);
+    static bool deleteCredential (string filename, string service);
+    static bool updateCredential (string filename, string service, Credential newCredy);
+    static Credential findCredential (string filename, string service, bool& found);
+    static vector<string> listServices (string filename);
+    static vector<Credential> loadCredentials (string filename);
 };
 
 #endif
